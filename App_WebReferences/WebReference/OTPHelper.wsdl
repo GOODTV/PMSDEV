@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://OTPServices.org/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://OTPServices.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://OTPServices.org/">
+      <s:element name="GenerateTokenByUserID">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="userId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="extendQueryString" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GenerateTokenByUserIDResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GenerateTokenByUserIDResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ParseTokenQueryString">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="queryString" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ParseTokenQueryStringResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ParseTokenQueryStringResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="string" nillable="true" type="s:string" />
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="GenerateTokenByUserIDSoapIn">
+    <wsdl:part name="parameters" element="tns:GenerateTokenByUserID" />
+  </wsdl:message>
+  <wsdl:message name="GenerateTokenByUserIDSoapOut">
+    <wsdl:part name="parameters" element="tns:GenerateTokenByUserIDResponse" />
+  </wsdl:message>
+  <wsdl:message name="ParseTokenQueryStringSoapIn">
+    <wsdl:part name="parameters" element="tns:ParseTokenQueryString" />
+  </wsdl:message>
+  <wsdl:message name="ParseTokenQueryStringSoapOut">
+    <wsdl:part name="parameters" element="tns:ParseTokenQueryStringResponse" />
+  </wsdl:message>
+  <wsdl:message name="GenerateTokenByUserIDHttpPostIn">
+    <wsdl:part name="userId" type="s:string" />
+    <wsdl:part name="extendQueryString" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GenerateTokenByUserIDHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="ParseTokenQueryStringHttpPostIn">
+    <wsdl:part name="queryString" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="ParseTokenQueryStringHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:portType name="OTPHelperSoap">
+    <wsdl:operation name="GenerateTokenByUserID">
+      <wsdl:input message="tns:GenerateTokenByUserIDSoapIn" />
+      <wsdl:output message="tns:GenerateTokenByUserIDSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ParseTokenQueryString">
+      <wsdl:input message="tns:ParseTokenQueryStringSoapIn" />
+      <wsdl:output message="tns:ParseTokenQueryStringSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="OTPHelperHttpPost">
+    <wsdl:operation name="GenerateTokenByUserID">
+      <wsdl:input message="tns:GenerateTokenByUserIDHttpPostIn" />
+      <wsdl:output message="tns:GenerateTokenByUserIDHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ParseTokenQueryString">
+      <wsdl:input message="tns:ParseTokenQueryStringHttpPostIn" />
+      <wsdl:output message="tns:ParseTokenQueryStringHttpPostOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="OTPHelperSoap" type="tns:OTPHelperSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GenerateTokenByUserID">
+      <soap:operation soapAction="http://OTPServices.org/GenerateTokenByUserID" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ParseTokenQueryString">
+      <soap:operation soapAction="http://OTPServices.org/ParseTokenQueryString" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="OTPHelperSoap12" type="tns:OTPHelperSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GenerateTokenByUserID">
+      <soap12:operation soapAction="http://OTPServices.org/GenerateTokenByUserID" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ParseTokenQueryString">
+      <soap12:operation soapAction="http://OTPServices.org/ParseTokenQueryString" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="OTPHelperHttpPost" type="tns:OTPHelperHttpPost">
+    <http:binding verb="POST" />
+    <wsdl:operation name="GenerateTokenByUserID">
+      <http:operation location="/GenerateTokenByUserID" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ParseTokenQueryString">
+      <http:operation location="/ParseTokenQueryString" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="OTPHelper">
+    <wsdl:port name="OTPHelperSoap" binding="tns:OTPHelperSoap">
+      <soap:address location="http://60.251.102.6/OTPServices/OTPHelper.asmx" />
+    </wsdl:port>
+    <wsdl:port name="OTPHelperSoap12" binding="tns:OTPHelperSoap12">
+      <soap12:address location="http://60.251.102.6/OTPServices/OTPHelper.asmx" />
+    </wsdl:port>
+    <wsdl:port name="OTPHelperHttpPost" binding="tns:OTPHelperHttpPost">
+      <http:address location="http://60.251.102.6/OTPServices/OTPHelper.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

@@ -1,0 +1,158 @@
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="ProgramChangeApplyContent.aspx.cs" Inherits="ProgramChange_ProgramChangeApplyContent" %>
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE11"/>
+    <title>節目異動申請內容</title>
+    <link href="../css/jquery-ui.min.css" rel="stylesheet" />
+    <link href="../css/pms-ui.css" rel="stylesheet" />
+    <script type="text/javascript" src="../Scripts/jquery.min.js"></script>
+    <script type="text/javascript" src="../Scripts/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="../Scripts/pms-script.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var ApplierName = getApplier_ajax($("#tbxRequester").val());
+            if (ApplierName == "") {
+                $("#tbxRequesterName").val("");
+            }
+            else {
+                $("#tbxRequesterName").val(ApplierName);
+            }
+            var Reviewer = getApplier_ajax($("#tbxReviewer").val());
+            if (Reviewer == "") {
+                $("#tbxReviewerName").val("");
+            }
+            else {
+                $("#tbxReviewerName").val(Reviewer);
+            }
+            var ActionPerformer = getApplier_ajax($("#tbxActionPerformer").val());
+            if (ActionPerformer == "") {
+                $("#tbxActionPerformerName").val("");
+            }
+            else {
+                $("#tbxActionPerformerName").val(ActionPerformer);
+            }
+        });
+        //取得申請人
+        function getApplier_ajax(ApplierID) {
+
+            var strData = "{'EMPLOYEE_NO':'" + ApplierID + "'}";
+            var strApplierName = "";
+
+            $.ajax({
+                type: "POST",
+                url: "../HRService.asmx/GetEmployee",
+                data: strData,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                async: false,
+                success: function (json) {
+                    var mydata = $.parseJSON(json.d);
+                    if (mydata.length > 0) {
+                        strApplierName = mydata[0].EMPLOYEE_CNAME;
+                    }
+                },
+                failure: function (ex) {
+                    alert(ex.get_message);
+                }
+            });
+
+            return strApplierName;
+
+        }
+    </script>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>
+        <asp:HiddenField runat="server" ID="HFD_Uid" />
+        <asp:HiddenField runat="server" ID="HFD_ApplyQuery_Key" />
+        <table width="100%" border="0" align="center" cellpadding="0" cellspacing="1" class="table-detail"> 
+            <tr style="HEIGHT: 30px">
+               <td style="text-align: left; background-color: #5EABDB; color: #FFFFFF; font-size:large" colspan="5">節目異動申請內容 <asp:Label ID="lblStatus" runat="server"></asp:Label></td>
+            </tr>
+            <tr>
+                <th align="left" width="10%">
+                    單號
+                </th>
+                <td align="left" class="style1" colspan="3">
+                    <asp:Label runat="server" ID="tbxChangeID" CssClass="font9" Width="100px"></asp:Label>
+                </td>
+            </tr>
+            <tr>
+                <th align="left">
+                    申請人
+                </th>
+                <td align="left" class="style1" colspan="3">
+                    <asp:Textbox runat="server" ID="tbxRequester" Width="50px" Height="10pt" BorderStyle="None" ReadOnly="true" TextMode="MultiLine" Style="overflow: hidden; font-family:Arial;"></asp:Textbox>
+                    <asp:Textbox runat="server" ID="tbxRequesterName" Width="60px" Height="10pt" BorderStyle="None" ReadOnly="true" TextMode="MultiLine" Style="overflow: hidden;"></asp:Textbox>
+                </td>
+            </tr>
+            <tr>
+                <th align="left">
+                    異動日期
+                </th>
+                <td align="left" class="style1" colspan="3">
+                    <asp:Label runat="server" ID="tbxChangeDate" Width="100px" CssClass="font9"></asp:Label>
+                </td>
+            </tr>
+            <tr>
+                <th align="left">
+                    異動頻道
+                </th>
+                <td align="left" class="style1" colspan="3">
+                    <asp:Label runat="server" ID="tbxChannel" Width="300px" CssClass="font9"></asp:Label>
+                </td>
+            </tr>
+            <tr>
+                <th align="left">
+                    異動內容
+                </th>
+                <td align="left" class="style1" colspan="3" height="100px">
+                    <asp:Label runat="server" ID="tbxContent" CssClass="font9"></asp:Label>
+                </td>
+            </tr>
+            <tr>
+                <th align="left">
+                    審核人
+                </th>
+                <td align="left" class="style1" Width="40%">
+                    <asp:Textbox runat="server" ID="tbxReviewer" Width="50px" Height="10pt" BorderStyle="None" ReadOnly="true" TextMode="MultiLine" Style="overflow: hidden;font-family:Arial;"></asp:Textbox>
+                    <asp:Textbox runat="server" ID="tbxReviewerName" Width="60px" Height="10pt" BorderStyle="None" ReadOnly="true" TextMode="MultiLine" Style="overflow: hidden;"></asp:Textbox>
+                </td>
+                <th align="left">
+                    片庫作業同工
+                </th>
+                <td align="left" class="style1">
+                    <asp:Textbox runat="server" ID="tbxActionPerformer" CssClass="font9" Width="50px" Height="10pt" BorderStyle="None" ReadOnly="true" TextMode="MultiLine" Style="overflow: hidden;font-family:Arial;"></asp:Textbox>
+                    <asp:Textbox runat="server" ID="tbxActionPerformerName" Width="60px" Height="10pt" BorderStyle="None" ReadOnly="true" TextMode="MultiLine" Style="overflow: hidden;"></asp:Textbox>
+                </td>
+            </tr>
+            <tr>
+                <th align="left">
+                    審核內容
+                </th>
+                <td align="left" class="style1" height="100px">
+                    <asp:Label runat="server" ID="tbxReviewComment" CssClass="font9"></asp:Label>
+                </td>
+                <th align="left">
+                    片庫作業結果
+                </th>
+                <td align="left" class="style1">
+                    <asp:Label runat="server" ID="tbxActionContent" CssClass="font9" Width="200px"></asp:Label>
+                </td>
+            </tr>
+            <tr>
+                <td align="right" colspan="4">
+                    <asp:Button ID="btnDel" runat="server" class="ui-button ui-corner-all" Text="取消申請" Width="80px" onclick="btnDel_Click"  OnClientClick= "return confirm('確定要取消申請？ '); "/>
+                    <asp:Button ID="btnExit" runat="server" class="ui-button ui-corner-all" Text="關閉" Width="70px" onclientclick="history.back(); return false;" />
+                </td>
+            </tr>
+        </table>
+    </div>
+    </form>
+</body>
+</html>

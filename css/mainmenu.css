@@ -1,0 +1,154 @@
+﻿body {
+    font-family: Verdana,Tahoma,Arial,Helvetica,sans-serif;
+    font-size: 12px;
+    margin: 0px;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Menu UI begin */
+.nav-table {
+    border-style: solid;
+    border-width: 1px;
+    border-color: #FFFFFF #B1CBD5 #B1CBD5 #FFFFFF;
+    background: #CEE7F5 repeat-x 0 center;
+    background-image: url(/img/common/bar-bg.png);
+    /*overflow: hidden;*/
+    margin: 0px;
+    width: 100%;
+}
+
+.nav-title {
+    color: blue;
+    font-size: 12px;
+    white-space: nowrap;
+    position: relative;
+    left: 10px;
+}
+
+ul.menu {
+    float: right;
+}
+
+ul.menu, ul.menu li, ul.menu ul, a{
+    margin: 0px;
+    padding: 0px;
+    text-decoration: none;
+}
+ul.menu,ul.menu li {
+    list-style: none;
+}
+
+ul.menu li {
+    font-size: 11px;
+    padding: 0px 5px;
+    position: relative;
+    float: left;
+    border: 1px solid transparent;
+    height: 21px;
+}
+
+/* 選單 li 裡面連結之樣式 */
+/* 特定在第一層，以左邊灰線分隔 */
+ul.menu li a {
+    display: block;
+    padding: 3px 5px;
+    /*background: #888;*/
+    color: black;
+    margin: 0px;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+ul.menu li a:hover {
+    border: 1px solid #80C7E1;
+    padding: 3px 5px;
+    background: #DDEEFB repeat-x scroll 0 0;
+    background-image: url(/img/menu/item-over.png); /*background-color: #EAF7F7;
+    border: 0px;
+        */
+}
+
+/* 特定在第一層 > 第二層之後下拉部分之樣式 */
+ul.menu li ul {
+    display: none;
+    position: absolute;
+    margin: 0px;
+    background: #CCE6FB repeat-y scroll 0 0;
+    border: 1px solid #86A4BE;
+    padding: 3px 0px;
+    z-index: 2;
+    /*
+    float: left;
+    padding: 1px;
+    left: 0;
+    */
+    background-image: url('../img/menu/pp-bg.png');
+}
+/* 當第一層選單被觸發時，指定第二層顯示 
+ul.menu li a:hover > ul{
+    display: block;
+}
+*/
+/* 特定在第二層或之後下拉部分 li 之樣式 */
+ul.menu ul li {
+    width: 130px;
+    /*border-bottom: 1px solid #DDD;
+    background: #CEE7F5 repeat-x 0 center;
+    background-image: url(/img/common/bar-bg.png);*/
+}
+/* 特定在第二層或之後下拉部分 li （最後一項不要底線）之樣式 */
+ul.menu ul li:last-child {
+    border-bottom: none;
+}
+
+/* 第二層或之後 選單 li 之樣式 */
+ul.menu ul a {
+    padding: 3px 12px 3px 26px;
+    border:1px solid transparent;
+    /*
+    color: #666;        
+    background: #EEE;
+        */
+}
+
+ul.menu ul a:hover {        
+    /*background: #CCC;*/
+    border:1px solid #A8D8EB;
+    padding: 3px 12px 3px 26px;
+    background: #DDEEFB repeat-x scroll 0 0;
+    background-image: url(/img/menu/item-over.png);
+
+}
+
+/* 第三層之後，上一層的選單觸發則顯示出來（皆為橫向拓展）
+ul.menu ul li:hover > ul{
+    display: block;
+    position: absolute;
+    top: 0;    
+    left: 100%;
+}
+    */
+
+/* 箭頭向下 */
+.arrow-bottom {
+    display: inline-block;
+    margin-left: 5px;
+    border-top: 4px solid #2581B3;
+    border-right: 4px solid transparent;    
+    border-left: 4px solid transparent;        
+    width: 1px;
+    height: 1px;
+}
+/* 箭頭向右 */
+.arrow-right {
+    display: inline-block;
+    margin-left: 12px;    
+    border-top: 3px solid transparent;
+    border-bottom: 3px solid transparent;
+    border-left: 3px solid #2581B3;        
+    width: 1px;
+    height: 1px;
+}
+/* Menu UI end */

@@ -1,0 +1,109 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+public partial class ProgramChange_ProgramChangeApplyContent : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            HFD_Uid.Value = Util.GetQueryString("ChangeID");
+            HFD_ApplyQuery_Key.Value = Util.GetQueryString("ApplyQuery_Key");
+            //Page.Response.Write("<Script language='JavaScript'>alert('" + HFD_Key.Value + "');</Script>");
+            btnDel.Visible = false;
+            Form_DataBind();
+            lblStatus.ForeColor = System.Drawing.Color.Black;
+        }
+    }
+    //帶入資料
+    public void Form_DataBind()
+    {
+        //****變數宣告****//
+        string strSql, uid;
+        DataTable dt;
+
+        //****變數設定****//
+        uid = HFD_Uid.Value;
+
+        //****設定查詢****//
+        strSql = @" select ChangeID ,Requester ,CONVERT(VarChar,ChangeDate,111) as 'ChangeDate' ,Channel ,Content ,
+                            Reviewer , ReviewComment ,ActionPerformer ,ActionContent,Status
+                            from [dbo].[_PG01P0]
+                    where ChangeID='" + uid + "'";
+        //****執行語法****//
+        dt = NpoDB.QueryGetTable(strSql);
+
+
+        //資料異常
+        if (dt.Rows.Count <= 0)
+            //todo : add Default.aspx page
+            Response.Redirect("ProgramChangeApplyQuery.aspx");
+
+        DataRow dr = dt.Rows[0];
+
+        //狀態
+        if (dr["Status"].ToString().Trim() == "01")
+        {
+            lblStatus.Text = "待審";
+            btnDel.Visible = true;
+        }
+        else if (dr["Status"].ToString().Trim() == "02")
+        {
+            lblStatus.Text = "待執行";
+        }
+        else if (dr["Status"].ToString().Trim() == "03")
+        {
+            lblStatus.Text = "異動完成";
+        }
+        else if (dr["Status"].ToString().Trim() == "04")
+        {
+            lblStatus.Text = "退件";
+        }
+        //單號
+        tbxChangeID.Text = dr["ChangeID"].ToString().Trim();
+        //申請人
+        tbxRequester.Text = dr["Requester"].ToString().Trim();
+        //異動日期
+        tbxChangeDate.Text = dr["ChangeDate"].ToString().Trim();
+        //異動頻道
+        if (dr["Channel"].ToString().Trim() == "01")
+        {
+            tbxChannel.Text = "一台";
+        }
+        else if (dr["Channel"].ToString().Trim() == "02")
+        {
+            tbxChannel.Text = "二台";
+        }
+        //異動內容
+        tbxContent.Text = dr["Content"].ToString().Trim();
+        //審核人
+        tbxReviewer.Text = dr["Reviewer"].ToString().Trim();
+        //審核內容
+        tbxReviewComment.Text = dr["ReviewComment"].ToString().Trim();
+        //片庫作業同工
+        tbxActionPerformer.Text = dr["ActionPerformer"].ToString().Trim();
+        //片庫作業結果
+        tbxActionContent.Text = dr["ActionContent"].ToString().Trim();
+    }
+    protected void btnExit_Click(object sender, EventArgs e)
+    {
+        Response.Redirect(Util.RedirectByTime("ProgramChangeApplyQuery.aspx", "ApplyQuery_Key=" + HFD_ApplyQuery_Key.Value));
+    }
+    protected void btnDel_Click(object sender, EventArgs e)
+    {
+        string strSql = "delete from [dbo].[_PG01P0] where ChangeID=@ChangeID";
+        Dictionary<string, object> dict = new Dictionary<string, object>();
+        dict.Add("ChangeID", HFD_Uid.Value);
+        NpoDB.ExecuteSQLS(strSql, dict);
+
+        Response.Write("<Script language='JavaScript'>alert('取消完成');</Script>");
+        //Response.Redirect(Util.RedirectByTime("ProgramChangeApplyQuery.aspx"));
+        Page.Response.Write("<Script language='JavaScript'>location.href=('ProgramChangeApplyQuery.aspx?ApplyQuery_Key=" + HFD_ApplyQuery_Key.Value + "');</Script>");
+        Response.End();
+    }
+}

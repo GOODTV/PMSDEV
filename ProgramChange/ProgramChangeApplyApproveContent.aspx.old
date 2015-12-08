@@ -1,0 +1,235 @@
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="ProgramChangeApplyApproveContent.aspx.cs" Inherits="ProgramChange_ProgramChangeApplyApproveContent" %>
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1" runat="server">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE11"/>
+    <title>節目異動申請內容</title>
+    <link href="../css/jquery-ui.min.css" rel="stylesheet" />
+    <link href="../css/pms-ui.css" rel="stylesheet" />
+    <script type="text/javascript" src="../Scripts/jquery.min.js"></script>
+    <script type="text/javascript" src="../Scripts/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="../Scripts/pms-script.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var ApplierName = getApplier_ajax($("#tbxRequester").val());
+            if (ApplierName == "") {
+                $("#tbxRequesterName").val("");
+            }
+            else {
+                $("#tbxRequesterName").val(ApplierName);
+            }
+            var Reviewer = getApplier_ajax($("#tbxReviewerID").val());
+            if (Reviewer == "") {
+                $("#tbxReviewerName").val("");
+            }
+            else {
+                $("#tbxReviewerName").val(Reviewer);
+            }
+            $("#tbxReviewer").blur(function () {
+                var ActionPerformer = getApplier_ajax($("#tbxReviewer").val());
+                if (ActionPerformer == "") {
+                    $("#tbxReviewerName").val("");
+                }
+                else {
+                    $("#tbxReviewerName").val(ActionPerformer);
+                }
+            });
+            var ActionPerformerShow = getApplier_ajax($("#lblActionPerformer").val());
+            if (ActionPerformerShow == "") {
+                $("#tbxActionPerformerName").val("");
+            }
+            else {
+                $("#tbxActionPerformerName").val(ActionPerformerShow);
+            }
+        });
+        
+        //取得申請人
+        function getApplier_ajax(ApplierID) {
+
+            var strData = "{'EMPLOYEE_NO':'" + ApplierID + "'}";
+            var strApplierName = "";
+
+            $.ajax({
+                type: "POST",
+                url: "../HRService.asmx/GetEmployee",
+                data: strData,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                async: false,
+                success: function (json) {
+                    var mydata = $.parseJSON(json.d);
+                    if (mydata.length > 0) {
+                        strApplierName = mydata[0].EMPLOYEE_CNAME;
+                    }
+                },
+                failure: function (ex) {
+                    alert(ex.get_message);
+                }
+            });
+
+            return strApplierName;
+
+        }
+        function CheckFieldMustFillBasic() {
+            var tbxReviewer = document.getElementById('tbxReviewer');
+            var strRet = "";
+            if (tbxReviewer.value == "") {
+                strRet += "請輸入審核者工號";
+                alert(strRet);
+                return false;
+            }
+            if (confirm('確定要作廢？')) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        function CheckApproveNo() {
+            if ($("#tbxPwd").val() != 'review2012') {
+                alert("密碼錯誤");
+                return false;
+            }
+            hideApprove();
+            return true;
+        }
+        function showApprove() {
+            var tbxReviewer = document.getElementById('tbxReviewer');
+            var strRet = "";
+            if (tbxReviewer.value == "") {
+                strRet += "請輸入審核者工號";
+                alert(strRet);
+                return false;
+            }
+            $("#reg").fadeTo("fast", 0.6);
+            $('#openApprove').show();
+        }
+        function hideApprove() {
+            $("#reg").hide()
+            $('#openApprove').hide();
+            $("#tbxPwd").val("");
+        }
+    </script>
+</head>
+<body>
+    <form id="form1" runat="server">
+        <asp:HiddenField runat="server" ID="HFD_Uid" />
+        <asp:HiddenField runat="server" ID="HFD_Key" />
+    <div id="reg" style="position: fixed; z-index: 100; top: 0px;
+        left: 0px; height: 100%; width: 100%; background: #000; display: none;">
+    </div>
+    <asp:Panel ID="ShowApprove" runat="server">
+    <div id="openApprove" style="background: #ffffff; border-radius: 5px 5px 5px 5px; color: blue;
+        font-size: large; display: none; padding-bottom: 2px; width: 350px; height: 100px;
+        z-index: 11001; left: 40%; position: fixed; text-align: center; top: 200px;">
+        <br />
+        <table style="width: 350px;" align="center" cellpadding="2" cellspacing="4">            
+            <tr style="color: #666666">
+                <td style="height: 25px" align="right">
+                    請輸入審核密碼：
+                </td>
+                <td align="left">
+                    <asp:TextBox ID="tbxPwd" runat="server" Width="150px" Font-Size="20px" TextMode="Password"></asp:TextBox>
+                </td>
+            </tr>
+            <tr>
+                <td style="width: auto; height: 19px" align="center" colspan="2">
+                    <asp:Button ID="btnCheck"  runat="server" Text="確認" Width="70px" OnClientClick="return CheckApproveNo();" Onclick="btnCheck_Click" />
+                    <asp:Button ID="btnCancel" runat="server" Text="取消" Width="70px"  OnClientClick="hideApprove();return false;"/>
+                </td>
+            </tr>
+        </table>
+    </div>
+    </asp:Panel>
+        <table width="100%" border="0" align="center" cellpadding="0" cellspacing="1" class="table-detail"> 
+            <tr style="HEIGHT: 30px">
+               <td style="text-align: left; background-color: #5EABDB; color: #FFFFFF; font-size:large" colspan="5">節目異動申請內容 <asp:Label ID="lblStatus" runat="server"></asp:Label></td>
+            </tr>
+            <tr>
+                <th align="left" width="10%">
+                    單號
+                </th>
+                <td align="left" class="style1" colspan="3">
+                    <asp:Label runat="server" ID="tbxChangeID" CssClass="font9" Width="100px"></asp:Label>
+                </td>
+            </tr>
+            <tr>
+                <th align="left">
+                    申請人
+                </th>
+                <td align="left" class="style1" colspan="3">
+                    <asp:Textbox runat="server" ID="tbxRequester" Width="50px" Height="10pt" BorderStyle="None" ReadOnly="true" TextMode="MultiLine" Style="overflow: hidden;font-family:Arial;"></asp:Textbox>
+                    <asp:Textbox runat="server" ID="tbxRequesterName" Width="60px" Height="10pt" BorderStyle="None" ReadOnly="true" TextMode="MultiLine" Style="overflow: hidden;"></asp:Textbox>
+                </td>
+            </tr>
+            <tr>
+                <th align="left">
+                    異動日期
+                </th>
+                <td align="left" class="style1" colspan="3">
+                    <asp:Label runat="server" ID="tbxChangeDate" Width="100px" CssClass="font9"></asp:Label>
+                </td>
+            </tr>
+            <tr>
+                <th align="left">
+                    異動頻道
+                </th>
+                <td align="left" class="style1" colspan="3">
+                    <asp:Label runat="server" ID="tbxChannel" Width="300px" CssClass="font9"></asp:Label>
+                </td>
+            </tr>
+            <tr>
+                <th align="left">
+                    異動內容
+                </th>
+                <td align="left" class="style1" colspan="3" height="100px">
+                    <asp:Label runat="server" ID="tbxContent" CssClass="font9"></asp:Label>
+                </td>
+            </tr>
+            <tr>
+                <th align="left">
+                    審核人
+                </th>
+                <td align="left" class="style1" Width="40%">
+                    <asp:Textbox runat="server" ID="tbxReviewer" CssClass="font9" Width="100px"></asp:Textbox>
+                    <asp:Label runat="server" ID="lblReviewer" CssClass="font9"></asp:Label>
+                    <asp:Textbox runat="server" ID="tbxReviewerID" Width="50px" Height="10pt" BorderStyle="None" ReadOnly="true" TextMode="MultiLine" Style="overflow: hidden;font-family:Arial;"></asp:Textbox>
+                    <asp:Textbox runat="server" ID="tbxReviewerName" Width="60px" Height="10pt" BorderStyle="None" ReadOnly="true" TextMode="MultiLine" Style="overflow: hidden;"></asp:Textbox>
+                </td>
+                <th align="left">
+                    片庫作業同工
+                </th>
+                <td align="left" class="style1">
+                    <asp:Label runat="server" ID="tbxActionPerformer" CssClass="font9"></asp:Label>
+                    <asp:Textbox runat="server" ID="lblActionPerformer" CssClass="font9" Width="50px" Height="10pt" BorderStyle="None" ReadOnly="true" TextMode="MultiLine" Style="overflow: hidden;font-family:Arial;"></asp:Textbox>
+                    <asp:Textbox runat="server" ID="tbxActionPerformerName" Width="60px" Height="10pt" BorderStyle="None" ReadOnly="true" TextMode="MultiLine" Style="overflow: hidden;"></asp:Textbox>
+                </td>
+            </tr>
+            <tr>
+                <th align="left">
+                    審核內容
+                </th>
+                <td align="left" class="style1" height="100px">
+                    <asp:Textbox runat="server" ID="tbxReviewComment" CssClass="font9" TextMode="MultiLine" Width="200px" Height="100px"></asp:Textbox>
+                    <asp:Label runat="server" ID="lblReviewComment" CssClass="font9"></asp:Label>
+                </td>
+                <th align="left">
+                    片庫作業結果
+                </th>
+                <td align="left" class="style1">
+                    <asp:Label runat="server" ID="tbxActionContent" CssClass="font9" Width="200px"></asp:Label>
+                </td>
+            </tr>
+            <tr>
+                <td align="right" colspan="4">
+                    <asp:Button ID="btnVoid" runat="server" class="ui-button ui-corner-all" Text="申請作廢" Width="80px" onclick="btnVoid_Click"  OnClientClick= "return CheckFieldMustFillBasic();"/>
+                    <asp:Button ID="btnApprove" runat="server" class="ui-button ui-corner-all" Text="核可" Width="80px" OnClientClick="showApprove();return false;"/>
+                    <asp:Button ID="btnExit" runat="server" class="ui-button ui-corner-all" Text="關閉" Width="70px" onclientclick="history.back(); return false;" />
+                </td>
+            </tr>
+        </table>
+    </form>
+</body>
+</html>

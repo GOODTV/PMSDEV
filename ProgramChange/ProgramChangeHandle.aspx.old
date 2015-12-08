@@ -1,0 +1,65 @@
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="ProgramChangeHandle.aspx.cs" Inherits="ProgramChange_ProgramChangeHandle" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE11"/>
+    <title>節目異動處理</title>
+    <link rel="stylesheet" type="text/css" href="../include/calendar-win2k-cold-1.css" />
+    <link href="../css/jquery-ui.min.css" rel="stylesheet" />
+    <link href="../css/pms-ui.css" rel="stylesheet" />
+    <script type="text/javascript" src="../Scripts/jquery.min.js"></script>
+    <script type="text/javascript" src="../Scripts/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="../Scripts/pms-script.js"></script>
+    <script type="text/javascript" src="../include/calendar.js"></script>
+    <script type="text/javascript" src="../include/calendar-big5.js"></script>
+    <script type="text/javascript" src="../include/common.js"></script>
+    <script type="text/javascript">
+        window.onload = initCalendar;
+        function initCalendar() {
+            Calendar.setup({
+                inputField: "tbxChangeDateS",   // id of the input field
+                button: "imgChangeDateS"     // 與觸發動作的物件ID相同
+            });
+            Calendar.setup({
+                inputField: "tbxChangeDateE",   // id of the input field
+                button: "imgChangeDateE"     // 與觸發動作的物件ID相同
+            });
+        }
+        function CheckFieldMustFillBasic() {
+        }
+        </script>
+</head>
+<body style="overflow:auto;">
+    <form id="form1" runat="server">
+    <div>
+    <asp:HiddenField runat="server" ID="HFD_Key" />
+        <table width="100%" border="0" align="left" cellpadding="0" cellspacing="1">
+            <tr>
+                <td>
+                異動日期
+                    <asp:TextBox runat="server" ID="tbxChangeDateS" CssClass="font9" Width="100px"></asp:TextBox>
+                    <img id="imgChangeDateS" alt="" src="../img/date.gif" />至
+                    <asp:TextBox runat="server" ID="tbxChangeDateE" CssClass="font9" Width="100px"></asp:TextBox>
+                    <img id="imgChangeDateE" alt="" src="../img/date.gif" />
+                    <asp:Button ID="btnQuery" class="ui-button ui-corner-all" runat="server" Width="15mm" Text="查詢" OnClientClick= "return CheckFieldMustFillBasic();" OnClick="btnQuery_Click"/>
+                    資料筆數：<asp:Label ID="count" runat="server"></asp:Label>
+                    <asp:RadioButtonList ID="rblValidStatus" runat="server" RepeatDirection="Horizontal">
+                        <asp:ListItem Value="1">未審核</asp:ListItem>
+                        <asp:ListItem Value="2" Selected="True">未處理</asp:ListItem>
+                        <asp:ListItem Value="3">全部</asp:ListItem>
+                    </asp:RadioButtonList>
+                </td>
+            </tr>
+            <tr>
+                <td align="center" width="100%" colspan="2">
+                        <asp:Label ID="lblGridList" runat="server" Text=""></asp:Label>
+                </td>
+            </tr>
+        </table>
+    </div>
+    </form>
+</body>
+</html>

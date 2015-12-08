@@ -1,0 +1,277 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data.SqlClient;
+using System.Configuration;
+
+public partial class ProgramChange_ProgramChangeApplyApproveContent : BasePage
+{
+    string hrcon = System.Configuration.ConfigurationManager.ConnectionStrings["HRConnection"].ConnectionString;
+    //寄送Email用
+    string MailFrom = "";
+    string MailSubject = "";
+    string MailBody = "";
+    string MailTo = "";
+    string MailToRequester = "";
+    
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            HFD_Uid.Value = Util.GetQueryString("ChangeID");
+            HFD_Key.Value = Util.GetQueryString("Key");
+            //Page.Response.Write("<Script language='JavaScript'>alert('" + HFD_Key.Value + "');</Script>");
+            btnVoid.Visible = false;
+            btnApprove.Visible = false;
+            tbxReviewer.Visible = false;
+            tbxReviewComment.Visible = false;
+            Form_DataBind();
+            lblStatus.ForeColor = System.Drawing.Color.Black;
+        }
+    }
+    //帶入資料
+    public void Form_DataBind()
+    {
+        //****變數宣告****//
+        string strSql, uid;
+        DataTable dt;
+
+        //****變數設定****//
+        uid = HFD_Uid.Value;
+
+        //****設定查詢****//
+        strSql = @" select ChangeID ,Requester ,CONVERT(VarChar,ChangeDate,111) as 'ChangeDate' ,Channel ,Content ,
+                            Reviewer , ReviewComment ,ActionPerformer ,ActionContent,Status
+                            from [dbo].[_PG01P0]
+                    where ChangeID='" + uid + "'";
+        //****執行語法****//
+        dt = NpoDB.QueryGetTable(strSql);
+
+
+        //資料異常
+        if (dt.Rows.Count <= 0)
+            //todo : add Default.aspx page
+            Response.Redirect("ProgramChangeApplyQuery.aspx");
+
+        DataRow dr = dt.Rows[0];
+
+        //狀態
+        if (dr["Status"].ToString().Trim() == "01")
+        {
+            lblStatus.Text = "待審";
+            btnVoid.Visible = true;
+            btnApprove.Visible = true;
+            tbxReviewer.Visible = true;
+            tbxReviewComment.Visible = true;
+            tbxReviewerID.Visible = false;
+        }
+        else if (dr["Status"].ToString().Trim() == "02")
+        {
+            lblStatus.Text = "待執行";
+            lblReviewer.Visible = false;
+        }
+        else if (dr["Status"].ToString().Trim() == "03")
+        {
+            lblStatus.Text = "異動完成";
+            lblReviewer.Visible = false;
+            tbxActionPerformer.Visible = false;
+        }
+        else if (dr["Status"].ToString().Trim() == "04")
+        {
+            lblStatus.Text = "退件";
+            lblReviewer.Visible = false;
+        }
+        //單號
+        tbxChangeID.Text = dr["ChangeID"].ToString().Trim();
+        //申請人
+        tbxRequester.Text = dr["Requester"].ToString().Trim();
+        //異動日期
+        tbxChangeDate.Text = dr["ChangeDate"].ToString().Trim();
+        //異動頻道
+        if (dr["Channel"].ToString().Trim() == "01")
+        {
+            tbxChannel.Text = "一台";
+        }
+        else if (dr["Channel"].ToString().Trim() == "02")
+        {
+            tbxChannel.Text = "二台";
+        }
+        //異動內容
+        tbxContent.Text = dr["Content"].ToString().Trim();
+        //審核人
+        lblReviewer.Text = dr["Reviewer"].ToString().Trim();
+        tbxReviewerID.Text = dr["Reviewer"].ToString().Trim();
+        //審核內容
+        lblReviewComment.Text = dr["ReviewComment"].ToString().Trim();
+        //片庫作業同工
+        tbxActionPerformer.Text = dr["ActionPerformer"].ToString().Trim();
+        lblActionPerformer.Text = dr["ActionPerformer"].ToString().Trim();
+        //片庫作業結果
+        tbxActionContent.Text = dr["ActionContent"].ToString().Trim();
+
+        //信件部分內容
+        string query = @"
+                            SELECT E.[EMPLOYEE_NO],E.[EMPLOYEE_CNAME],E.[EMPLOYEE_EMAIL_1]
+                                ,E.[EMPLOYEE_OFFICE_TEL_1],E.[EMPLOYEE_CONTACT_TEL_1],D.[DEPARTMENT_CNAME],D.[DEPARTMENT_CODE]
+                            FROM [HRMS_EMPLOYEE] as E,[HRMS_DEPARTMENT] as D
+                            WHERE E.[DEPARTMENT_ID] = D.[DEPARTMENT_ID] AND E.[EMPLOYEE_NO] = '" + dr["Requester"].ToString().Trim() + "' ";
+        DataSet ds = new DataSet();
+        using (SqlConnection conn = new SqlConnection(hrcon))
+        {
+            SqlDataAdapter da = new SqlDataAdapter(query, conn);
+            da.Fill(ds, "HR");
+        }
+        DataRow HRrow = ds.Tables["HR"].Rows[0];
+        
+        //申請通知信
+        Session["strBody"] = "姓名：" + HRrow["EMPLOYEE_CNAME"].ToString().Trim() + "<BR>";
+        Session["strBody"] += "工號：" + HRrow["EMPLOYEE_NO"].ToString().Trim() + "<BR>";
+        Session["strBody"] += "部門：" + HRrow["DEPARTMENT_CNAME"].ToString().Trim() + "<BR>";
+        Session["strBody"] += "分機：" + HRrow["EMPLOYEE_OFFICE_TEL_1"].ToString().Substring(14) + "<BR>";
+        Session["strBody"] += "手機：" + HRrow["EMPLOYEE_CONTACT_TEL_1"].ToString().Trim() + "<BR>";
+        Session["strBody"] += "異動編號：" + dr["ChangeID"].ToString().Trim() + "<BR>";
+        Session["strBody"] += "異動台別：" + dr["Channel"].ToString().Trim() + "<BR>";
+        Session["strBody"] += "<BR>" + dr["Content"].ToString().Trim() + "<BR><BR>";
+        Session["ReviewerEmail"] = HRrow["EMPLOYEE_EMAIL_1"].ToString().Trim();
+    }
+    protected void btnExit_Click(object sender, EventArgs e)
+    {
+        Response.Redirect(Util.RedirectByTime("ProgramChangeVerify.aspx", "Key=" + HFD_Key.Value));
+    }
+    protected void btnVoid_Click(object sender, EventArgs e)
+    {
+        bool flag = false;
+        try
+        {
+            ProgramChangeApply_Void();
+            flag = true;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        if (flag == true)
+        {
+            Response.Write("<Script language='JavaScript'>alert('節目異動申請內容動作完成！');</Script>");
+            //Response.Redirect(Util.RedirectByTime("ProgramChangeVerify.aspx"));
+            Page.Response.Write("<Script language='JavaScript'>location.href=('ProgramChangeVerify.aspx?Key=" + HFD_Key.Value + "');</Script>");
+            Response.End();
+        }
+    }
+    public void ProgramChangeApply_Void()
+    {
+        //****變數宣告****//
+        Dictionary<string, object> dict = new Dictionary<string, object>();
+
+        //****設定SQL指令****//
+        string strSql = " update [dbo].[_PG01P0] set ";
+
+        strSql += "  Reviewer = @Reviewer";
+        strSql += ", ReviewDate = @ReviewDate";
+        strSql += ", ReviewComment = @ReviewComment";
+        strSql += ", Status = @Status";
+
+        strSql += ", ModifiedUser= @ModifiedUser";
+        strSql += ", ModifiedDatetime = @ModifiedDatetime";
+        strSql += " where ChangeID = @ChangeID";
+
+        dict.Add("Reviewer", tbxReviewer.Text.Trim());
+        dict.Add("ReviewDate", DateTime.Now.ToString("yyyy-MM-dd"));
+        dict.Add("ReviewComment", tbxReviewComment.Text.Trim());
+        dict.Add("Status", "04");
+
+
+        dict.Add("ModifiedUser", SessionInfo.UserID);
+        dict.Add("ModifiedDatetime", DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss"));
+
+        dict.Add("ChangeID", HFD_Uid.Value);
+        NpoDB.ExecuteSQLS(strSql, dict);
+
+    }
+    protected void btnCheck_Click(object sender, EventArgs e)
+    {
+        bool flag = false;
+        try
+        {
+            ProgramChangeApply_Edit();
+            flag = true;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        if (flag == true)
+        {
+            //部分信件內容
+            string query = @"
+                            SELECT E.[EMPLOYEE_NO],E.[EMPLOYEE_CNAME],E.[EMPLOYEE_EMAIL_1]
+                                ,E.[EMPLOYEE_OFFICE_TEL_1],E.[EMPLOYEE_CONTACT_TEL_1],D.[DEPARTMENT_CNAME],D.[DEPARTMENT_CODE]
+                            FROM [HRMS_EMPLOYEE] as E,[HRMS_DEPARTMENT] as D
+                            WHERE E.[DEPARTMENT_ID] = D.[DEPARTMENT_ID] AND E.[EMPLOYEE_NO] = '" + tbxReviewer.Text + "' ";
+            DataSet ds = new DataSet();
+            using (SqlConnection conn = new SqlConnection(hrcon))
+            {
+                SqlDataAdapter da = new SqlDataAdapter(query, conn);
+                da.Fill(ds, "HR");
+            }
+            DataRow HRrow = ds.Tables["HR"].Rows[0];
+            string strBody = "";
+            strBody += "審核者：" + HRrow["EMPLOYEE_CNAME"].ToString().Trim() + "<BR>";
+            strBody += "審核內容：" + tbxReviewComment.Text.Trim() + "<BR><BR>";
+            strBody += "此為系統發出之信件，請勿回覆此信件！";
+
+            SendEMailObject MailObject = new SendEMailObject();
+            //MailObject.SmtpServer = SmtpServer;
+            MailSubject = " 節目異動--審核通知";
+            MailBody = Session["strBody"].ToString() + strBody;
+            MailTo = System.Configuration.ConfigurationManager.AppSettings["EmailToPMS"];
+            MailToRequester = Session["ReviewerEmail"].ToString();
+            MailFrom = System.Configuration.ConfigurationManager.AppSettings["MailFrom"];
+            string result = MailObject.SendEmail(MailTo, MailFrom, MailSubject, MailBody);
+            string result2 = MailObject.SendEmail(MailToRequester, MailFrom, MailSubject, MailBody);
+            if (MailObject.ErrorCode != 0)
+            {
+                ClientScript.RegisterStartupScript(this.GetType(), "s", "<script>alert('" + MailObject.ErrorMessage + MailObject.ErrorCode + "=>" + result + "');</script>");
+            }
+            //------------------------------------------------------------------------------------------
+            Response.Write("<Script language='JavaScript'>alert('節目異動申請內容審核完成');</Script>");
+            //Response.Redirect(Util.RedirectByTime("ProgramChangeVerify.aspx"));
+            Page.Response.Write("<Script language='JavaScript'>location.href=('ProgramChangeVerify.aspx?Key=" + HFD_Key.Value + "');</Script>");
+            Response.End();
+        }
+    }
+    public void ProgramChangeApply_Edit()
+    {
+        //****變數宣告****//
+        Dictionary<string, object> dict = new Dictionary<string, object>();
+
+        //****設定SQL指令****//
+        string strSql = " update [dbo].[_PG01P0] set ";
+
+        strSql += "  Reviewer = @Reviewer";
+        strSql += ", ReviewDate = @ReviewDate";
+        strSql += ", ReviewComment = @ReviewComment";
+        strSql += ", Status = @Status";
+
+        strSql += ", ModifiedUser= @ModifiedUser";
+        strSql += ", ModifiedDatetime = @ModifiedDatetime";
+        strSql += " where ChangeID = @ChangeID";
+
+        dict.Add("Reviewer", tbxReviewer.Text.Trim());
+        dict.Add("ReviewDate", DateTime.Now.ToString("yyyy-MM-dd"));
+        dict.Add("ReviewComment", tbxReviewComment.Text.Trim());
+        dict.Add("Status", "02");
+
+
+        dict.Add("ModifiedUser", SessionInfo.UserID);
+        dict.Add("ModifiedDatetime", DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss"));
+
+        dict.Add("ChangeID", HFD_Uid.Value);
+        NpoDB.ExecuteSQLS(strSql, dict);
+
+    }
+}
